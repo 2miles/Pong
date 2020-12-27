@@ -37,6 +37,8 @@ public class GamePanel extends JPanel implements Runnable{
     //create a new ball on the screen
     //call this method whenever we want to reset a level
     public void newBall() {
+        //random = new Random();
+        ball = new Ball( (GAME_WIDTH / 2) - (BALL_DIAMETER / 2), (GAME_HEIGHT / 2) - (BALL_DIAMETER / 2), BALL_DIAMETER, BALL_DIAMETER);
 
     }
 
@@ -59,6 +61,8 @@ public class GamePanel extends JPanel implements Runnable{
     public void draw(Graphics g) {
         paddle1.draw(g);
         paddle2.draw(g);
+        ball.draw(g);
+        score.draw(g);
     }
 
 
@@ -69,8 +73,44 @@ public class GamePanel extends JPanel implements Runnable{
         ball.move();
     }
 
-    //stops paddles at window edges
     public void checkCollision() {
+
+        //stops paddles at window edges
+        if(ball.y <= 0) {
+            ball.setYDirection(-ball.yVelocity);
+        }
+        if(ball.y >= GAME_HEIGHT - BALL_DIAMETER)
+            ball.setYDirection(-ball.yVelocity);
+
+        //bounces ball of paddles
+        if(ball.intersects(paddle1)) {
+            ball.xVelocity = Math.abs(ball.xVelocity); // or we could just multiply by -1
+            ++ball.xVelocity; //optional for more difficulty
+
+            if(ball.yVelocity > 0) {
+                ++ball.yVelocity;  //optional for more difficulty
+            }
+            else
+                --ball.yVelocity;
+            ball.setXDirection(ball.xVelocity);
+            ball.setYDirection(ball.yVelocity);
+        }
+
+        if(ball.intersects(paddle2)) {
+            ball.xVelocity = Math.abs(ball.xVelocity); // or we could just multiply by -1
+            ++ball.xVelocity; //optional for more difficulty
+
+            if(ball.yVelocity > 0) {
+                ++ball.yVelocity;  //optional for more difficulty
+            }
+            else
+                --ball.yVelocity;
+            ball.setXDirection(-ball.xVelocity);
+            ball.setYDirection(ball.yVelocity);
+        }
+
+
+        //bounce the ball of the top and botton edges
         if(paddle1.y <= 0)
             paddle1.y = 0;
         if(paddle1.y >= (GAME_HEIGHT - PADDLE_HEIGHT))
@@ -81,6 +121,20 @@ public class GamePanel extends JPanel implements Runnable{
         if(paddle2.y >= (GAME_HEIGHT - PADDLE_HEIGHT))
             paddle2.y = GAME_HEIGHT - PADDLE_HEIGHT;
 
+        //give a player 1 point and creates new paddles and ball
+        if(ball.x <= 0) {
+            ++score.player2;
+            newPaddles();
+            newBall();
+            System.out.println("Player 2: " + score.player2);
+        }
+
+        if(ball.x >= GAME_WIDTH - BALL_DIAMETER) {
+            ++score.player1;
+            newPaddles();
+            newBall();
+            System.out.println("Player 1: " + score.player1);
+        }
     }
 
     //basic game loop
